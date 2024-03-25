@@ -112,7 +112,7 @@ const SignupScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 })
                 .then(() => {
                     console.log('Vendor added!');
-                    navigation.navigate('Info');
+                    navigation.navigate('VendorDashBoard');
                 })
                 .catch(error => {
                     console.error('Error adding vendor: ', error);

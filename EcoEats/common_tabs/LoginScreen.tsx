@@ -26,7 +26,7 @@ const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                         navigation.navigate('Search');
                     }
                     else if(userType==='vendor'){
-                        navigation.navigate('Info');
+                        navigation.navigate('VendorDashBoard');
                     }
                 }
                 else{

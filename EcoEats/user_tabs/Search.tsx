@@ -125,8 +125,26 @@ const SearchScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             name: data?.name,
             location: location?.coords ? new firestore.GeoPoint(location.coords.latitude, location.coords.longitude) : new firestore.GeoPoint(0, 0)
         }; 
+        let userOrderInfoArray: UserOrderInfo[] = [];
+        const userOrderInfoSnapshot = await firestore().collection('Users').doc(vendorID).get();
+        
+        if(userOrderInfoSnapshot.data()?.ordersReceived)
+        {
+            if(userOrderInfoSnapshot.data()?.ordersReceived.length>0)
+            {
+                userOrderInfoArray = userOrderInfoSnapshot.data()?.ordersReceived;
+            }
+            userOrderInfoArray.push(userOrderInfo);
+        }
+        else
+        {
+            userOrderInfoArray.push(userOrderInfo);
+        }
+        console.log(userOrderInfoArray);
+
+
         await firestore().collection('Users').doc(vendorID).update({
-            ordersReceived: userOrderInfo,
+            ordersReceived: userOrderInfoArray,
         });
         navigation.navigate('Order');
     };

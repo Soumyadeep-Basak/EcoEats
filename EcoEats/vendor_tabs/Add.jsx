@@ -18,8 +18,6 @@ import {
     
     const [imageData, setImageData] = useState(null);
     const [name, setName] = useState('');
-    const [price, setPrice] = useState(0);
-    const [discountPrice, setDiscountPrice] = useState(0);
     const [description, setDescription] = useState('');
     const [imageUrl, setImageUrl] = useState('');
     const requestCameraPermission = async () => {
@@ -46,6 +44,7 @@ import {
         console.warn(err);
       }
     };
+
     const openGallery = async () => {
       const result = await launchImageLibrary({mediaType: 'photo'});
       if (result.didCancel) {
@@ -55,7 +54,7 @@ import {
       }
     };
   
-    const uplaodImage = async () => {
+    const uploadImage = async () => {
       const reference = storage().ref(imageData.assets[0].fileName);
       const pathToFile = imageData.assets[0].uri;
       // uploads file
@@ -67,19 +66,36 @@ import {
       uploadItem(url);
     };
   
-    const uploadItem = url => {
+    const uploadItem = (url) => {
+      const user = auth().currentUser;
       firestore()
-        .collection('items')
-        .add({
+      .collection('Users')
+      .doc(user.uid)
+      .update({
+        items: firestore.FieldValue.arrayUnion({
           name: name,
-          price: price,
-          discountPrice: discountPrice,
           description: description,
-          imageUrl: url + '',
-        })
-        .then(() => {
-          console.log('User added!');
-        });
+          image: url,
+        }),
+      })
+      .then(() => {
+        console.log('Item Added!');
+      });
+
+      firestore()
+      .collection('Items')
+      .where('vendorId', '==', user.uid)
+      .update({
+        items: firestore.FieldValue.arrayUnion({
+          name: name,
+          description: description,
+          image: url,
+        }),
+      })
+      .then(() => {
+        console.log('Item Added!');
+      });
+
     };
   
     return (
@@ -100,18 +116,6 @@ import {
             style={styles.inputStyle}
             value={name}
             onChangeText={text => setName(text)}
-          />
-          <TextInput
-            placeholder="Enter Item Price"
-            style={styles.inputStyle}
-            value={price}
-            onChangeText={text => setPrice(text)}
-          />
-          <TextInput
-            placeholder="Enter Item Discount Price"
-            style={styles.inputStyle}
-            value={discountPrice}
-            onChangeText={text => setDiscountPrice(text)}
           />
           <TextInput
             placeholder="Enter Item Description"
@@ -136,7 +140,7 @@ import {
           <TouchableOpacity
             style={styles.uploadBtn}
             onPress={() => {
-              uplaodImage();
+              uploadImage();
             }}>
             <Text style={{color: '#Fff'}}>Upload Item</Text>
           </TouchableOpacity>
